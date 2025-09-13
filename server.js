@@ -65,6 +65,123 @@ app.put('/customer/update/:id' , async(req,res) =>{
     }
 })
 
+app.delete('/customer/delete/:id' , async(req,res) =>{
+    try {
+        const id = req.params.id
+        const customer = await prisma.customer.delete({
+            where:{
+                id:id
+            }
+        })
+        res.json(customer)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.post('/customer/startsWith', async(req,res) =>{
+    try {
+        const keyword = req.body.keyword;
+        const customers = await prisma.customer.findMany({
+            where:{
+                name:{
+                    startsWith: keyword
+                }
+            }
+        })
+        res.json({results: customers})
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.post('/customer/endsWith', async(req,res) =>{
+    try {
+        const keyword = req.body.keyword;
+        const customers = await prisma.customer.findMany({
+            where:{
+                name:{
+                    endsWith: keyword
+                }
+            }
+        })
+        res.json({results: customers})
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.post('/customer/contains', async(req,res) =>{
+    try {
+        const keyword = req.body.keyword;
+        const customers = await prisma.customer.findMany({
+            where:{
+                name:{
+                    contains: keyword
+                }
+            }
+        })
+        res.json({results: customers})
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.get('/customer/findCreditIsNotZero', async(req,res) =>{
+    try {
+        const customers = await prisma.customer.findMany({
+            where:{
+                credit:{
+                    not: 0
+                }
+            }
+        })
+        res.json({result: customers})
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.get('/customer/sortByName', async(req,res) =>{
+    try {
+        const customers = await prisma.customer.findMany({
+            orderBy:{
+                name: 'asc'
+            }
+        })
+        res.json(customers)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.get('/customer/whereAnd', async(req,res) =>{
+    try {
+        const customers = await prisma.customer.findMany({
+            where:{
+                AND:[
+                    {
+                        name:{
+                            contains: 'n'
+                        }
+                    },
+                    {
+                        credit:{
+                            gt: 0
+                        }
+                    }
+                ]
+            }
+        })
+        res.json(customers)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
 app.listen(port,() =>{
     console.log(`Server is running on port ${port}`);
 })
