@@ -182,6 +182,123 @@ app.get('/customer/whereAnd', async(req,res) =>{
     }
 })
 
+app.get('/customer/listBetweenCredit', async(req,res) =>{
+    try {
+        const customers = await prisma.customer.findMany({
+            where:{
+                credit:{
+                    gt: 100000,
+                    lt: 900000
+                }
+            }
+        })
+        res.json(customers)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+} )
+
+app.get('/customer/sumCredit', async(req , res) =>{
+    try {
+        const customers = await prisma.customer.aggregate({
+            _sum:{
+                credit: true
+            }
+        })
+        res.json({sumCredit: customers._sum.credit})
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.get('/customer/avgCredit', async(req , res) =>{
+    try {
+        const customers = await prisma.customer.aggregate({
+            _avg:{
+                credit: true
+            }
+        })
+        res.json({avgCredit: customers._avg.credit})
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+app.get('/customer/countCustomer', async(req,res) =>{
+    try {
+        const countCus = await prisma.customer.count()
+        res.json({count: countCus})
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+ app.post('/order/create', async(req,res) =>{
+    try {
+        const customerId = req.body.customerId
+        const amount = req.body.amount
+        const order = await prisma.order.create({
+            data:{
+                customerId,
+                amount
+            }
+        })
+        res.json(order)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+ })
+
+ app.get('/customer/listOrder/:customerId', async(req, res) =>{
+    try {
+        const customerId = req.params.customerId
+        const orders = await prisma.order.findMany({
+            where:{
+                customerId: customerId
+            }
+        })
+        res.json(orders)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+ })
+
+ app.get('/customer/listAllOrder', async(req,res) =>{
+    try {
+        const orders = await prisma.customer.findMany({
+            include:{
+                Orders: true
+            }
+        })
+        res.json({orders: orders})
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+ })
+
+ app.get('/customer/listOrderAndProduct/:customerId', async(req,res) =>{
+    try {
+        const customerId = req.params.customerId;
+        const customers = await prisma.customer.findMany({
+            where:{
+                id: customerId
+            },
+            include:{
+                Orders: {
+                    include: {
+                        Product: true
+                    }
+                }
+            }
+        })
+        res.json(customers)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+ })
+
 app.listen(port,() =>{
     console.log(`Server is running on port ${port}`);
 })
